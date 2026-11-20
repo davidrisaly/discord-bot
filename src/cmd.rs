@@ -1,62 +1,91 @@
-use crate::serenity::{CreateEmbed, CreateEmbedAuthor};
-use crate::{api, env};
-use num_format::{Locale, ToFormattedString};
-use std::sync::LazyLock;
+use crate::{conf::Config, env, serenity};
+use anyhow::{Error as E, Result};
+use std::sync::{LazyLock, RwLock};
+use unb_api::structs::UnbelievaBoat;
 
-pub struct Data {} // User data, which is stored and accessible in all command invocations
-pub type Context<'a> = poise::Context<'a, Data, anyhow::Error>;
+pub struct U {}
+pub type Context<'a> = poise::Context<'a, U, E>;
 
-static UNB: LazyLock<api::UnbelievaBoat> =
-    LazyLock::new(|| api::UnbelievaBoat::new(env::var("UNB_TOKEN").as_str()).unwrap());
+/// Provides function expansion to UnbelievaBoat with the help of UnbelievaBoat API.
+// TODO: Make this bot's own economy later.
+static _UNB: LazyLock<UnbelievaBoat> =
+    LazyLock::new(|| UnbelievaBoat::new(env::var("UNB_TOKEN").as_str()).unwrap());
 
-pub fn cmds() -> Vec<poise::Command<Data, anyhow::Error>> {
-    vec![bal()]
+// TODO: Variabel ini hanya menyimpan data di RAM yang hilang saat aplikasi restart.
+//       Buat hal ini supaya punya backup persisten seperti di disk, contohnya dengan
+//       membuat file konfigurasi JSON atau bahkan pada database seperti SQLite.
+static CONFIG: LazyLock<RwLock<Config>> = LazyLock::new(|| RwLock::new(Config::new()));
+
+pub fn cmds() -> Vec<poise::Command<U, E>> {
+    vec![config()]
 }
 
-#[poise::command(slash_command, guild_only)]
-pub async fn bal(ctx: Context<'_>) -> anyhow::Result<()> {
-    let res = UNB
-        .get_user_balance(ctx.guild_id().unwrap().into(), ctx.author().id.into())
-        .await?;
+#[poise::command(
+    slash_command,
+    subcommands("welcome", "goodbye", "counting", "debug"),
+    subcommand_required
+)]
+async fn config(_ctx: Context<'_>) -> Result<()> {
+    Ok(())
+}
 
-    let embed = CreateEmbed::new()
-        .author(
-            CreateEmbedAuthor::new(
-                res.user_id
-                    .parse::<crate::serenity::UserId>()?
-                    .to_user(&ctx)
-                    .await?
-                    .name,
-            )
-            .icon_url(
-                res.user_id
-                    .parse::<crate::serenity::UserId>()?
-                    .to_user(&ctx)
-                    .await?
-                    .face(),
-            ),
-        )
-        .description(format!("Leaderboard Rank: {}", res.rank))
-        .color(0x3498DB)
-        .field(
-            "Cash",
-            format!("⭓{}", res.cash.to_formatted_string(&Locale::en)),
-            true,
-        )
-        .field(
-            "Bank",
-            format!("⭓{}", res.bank.to_formatted_string(&Locale::en)),
-            true,
-        )
-        .field(
-            "Total",
-            format!("⭓{}", res.total.to_formatted_string(&Locale::en)),
-            true,
-        );
+#[poise::command(slash_command)]
+async fn welcome(
+    ctx: Context<'_>,
+    #[description = "A dedicated channel for welcoming new members"]
+    #[channel_types("Text")]
+    channel: serenity::GuildChannel,
+) -> Result<()> {
+    ctx.say(format!("{}", channel.id)).await?;
 
-    let reply = poise::CreateReply::default().embed(embed);
+    {
+        let mut guard = CONFIG.write().unwrap();
+        guard.welcome_channel = channel.id.into();
+    }
 
-    ctx.send(reply).await?;
+    Ok(())
+}
 
+#[poise::command(slash_command)]
+async fn goodbye(
+    ctx: Context<'_>,
+    #[description = "A dedicated channel for saying goodbye for leaving members"]
+    #[channel_types("Text")]
+    channel: serenity::GuildChannel,
+) -> Result<()> {
+    ctx.say(format!("{}", channel.id)).await?;
+
+    {
+        let mut guard = CONFIG.write().unwrap();
+        guard.goodbye_channel = channel.id.into();
+    }
+
+    Ok(())
+}
+
+#[poise::command(slash_command)]
+async fn counting(
+    ctx: Context<'_>,
+    #[description = "A dedicated channel for counting"]
+    #[channel_types("Text")]
+    channel: serenity::GuildChannel,
+) -> Result<()> {
+    ctx.say(format!("{}", channel.id)).await?;
+
+    {
+        let mut guard = CONFIG.write().unwrap();
+        guard.counting_channel = channel.id.into();
+    }
+
+    Ok(())
+}
+
+#[poise::command(slash_command)]
+async fn debug(ctx: Context<'_>) -> Result<()> {
+    let text = {
+        let cfg = CONFIG.read().unwrap();
+        format!("```rust\n{:#?}\n```", *cfg)
+    };
+    ctx.say(text).await?;
     Ok(())
 }
