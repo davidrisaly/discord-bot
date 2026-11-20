@@ -17,7 +17,6 @@ impl Config {
     }
 }
 
-// 2026-11-20 01:12 - [¿?]: malas bat anjeng
 pub struct Store {
     pub path: String,
     pub inner: Config,
