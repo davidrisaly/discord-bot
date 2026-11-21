@@ -21,7 +21,7 @@ async fn welcome(
 
     ctx.say(format!("{}", channel.id)).await?;
     guard
-        .update_config(|c| c.welcome_channel = channel.id)
+        .update_config(|c| c.channels.welcome = channel.id)
         .await?;
 
     Ok(())
@@ -38,7 +38,7 @@ async fn goodbye(
 
     ctx.say(format!("{}", channel.id)).await?;
     guard
-        .update_config(|c| c.goodbye_channel = channel.id)
+        .update_config(|c| c.channels.goodbye = channel.id)
         .await?;
 
     Ok(())
@@ -55,7 +55,7 @@ async fn counting(
 
     ctx.say(format!("{}", channel.id)).await?;
     guard
-        .update_config(|c| c.counting_channel = channel.id)
+        .update_config(|c| c.channels.counting = channel.id)
         .await?;
 
     Ok(())

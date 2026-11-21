@@ -1,30 +1,4 @@
-pub mod admin;
-
-use crate::{conf::Store, env::var, serenity};
-use anyhow::{Error as E, Result};
-use serenity::{
-    FullEvent::{GuildMemberAddition, GuildMemberRemoval, Ready},
-    model::id::ChannelId,
-};
-use std::sync::LazyLock;
-use tokio::sync::RwLock;
-use unb_api::structs::UnbelievaBoat;
-
-pub struct U {}
-pub type Context<'a> = poise::Context<'a, U, E>;
-
-/// Provides function expansion to UnbelievaBoat with the help of UnbelievaBoat API.
-// TODO: Make this bot's own economy later.
-static _UNB: LazyLock<UnbelievaBoat> =
-    LazyLock::new(|| UnbelievaBoat::new(var("UNB_TOKEN")).unwrap());
-
-// TODO: Variabel ini hanya menyimpan data di RAM yang hilang saat aplikasi restart.
-//       Buat hal ini supaya punya backup persisten seperti di disk, contohnya dengan
-//       membuat file konfigurasi JSON atau bahkan pada database seperti SQLite.
-// static CONFIG: LazyLock<RwLock<Config>> = LazyLock::new(|| RwLock::new(Config::default()));
-
-static CONFIG: LazyLock<RwLock<Store>> =
-    LazyLock::new(|| RwLock::new(Store::new("config.json").unwrap()));
+use super::*;
 
 pub async fn event_handler(
     ctx: poise::FrameworkContext<'_, U, E>,
@@ -37,6 +11,11 @@ pub async fn event_handler(
             } else {
                 println!("{} is online", data_about_bot.user.name)
             }
+        }
+        Message { new_message }
+            if new_message.channel_id == CONFIG.read().await.inner.channels.counting =>
+        {
+            counting(new_message);
         }
         GuildMemberAddition { new_member } => {
             ChannelId::new(1570146478272553061)
@@ -61,8 +40,4 @@ pub async fn event_handler(
     }
 
     Ok(())
-}
-
-pub fn cmds() -> Vec<poise::Command<U, E>> {
-    vec![admin::config()]
 }
