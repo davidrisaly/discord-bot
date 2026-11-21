@@ -1,6 +1,6 @@
 pub mod admin;
 
-use crate::{conf::Config, env::var, serenity};
+use crate::{conf::Store, env::var, serenity};
 use anyhow::{Error as E, Result};
 use serenity::{
     FullEvent::{GuildMemberAddition, GuildMemberRemoval, Ready},
@@ -21,7 +21,10 @@ static _UNB: LazyLock<UnbelievaBoat> =
 // TODO: Variabel ini hanya menyimpan data di RAM yang hilang saat aplikasi restart.
 //       Buat hal ini supaya punya backup persisten seperti di disk, contohnya dengan
 //       membuat file konfigurasi JSON atau bahkan pada database seperti SQLite.
-static CONFIG: LazyLock<RwLock<Config>> = LazyLock::new(|| RwLock::new(Config::default()));
+// static CONFIG: LazyLock<RwLock<Config>> = LazyLock::new(|| RwLock::new(Config::default()));
+
+static CONFIG: LazyLock<RwLock<Store>> =
+    LazyLock::new(|| RwLock::new(Store::new("config.json").unwrap()));
 
 pub async fn event_handler(
     ctx: poise::FrameworkContext<'_, U, E>,
@@ -29,7 +32,11 @@ pub async fn event_handler(
 ) -> Result<()> {
     match event {
         Ready { data_about_bot } => {
-            println!("{}", data_about_bot.user.name);
+            if let Some(discriminator) = data_about_bot.user.discriminator {
+                println!("{}#{} is online", data_about_bot.user.name, discriminator);
+            } else {
+                println!("{} is online", data_about_bot.user.name)
+            }
         }
         GuildMemberAddition { new_member } => {
             ChannelId::new(1570146478272553061)

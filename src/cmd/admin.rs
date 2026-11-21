@@ -17,12 +17,12 @@ async fn welcome(
     #[channel_types("Text")]
     channel: serenity::GuildChannel,
 ) -> Result<()> {
-    ctx.say(format!("{}", channel.id)).await?;
+    let mut guard = CONFIG.write().await;
 
-    {
-        let mut guard = CONFIG.write().await;
-        guard.welcome_channel = channel.id.into();
-    }
+    ctx.say(format!("{}", channel.id)).await?;
+    guard
+        .update_config(|c| c.welcome_channel = channel.id)
+        .await?;
 
     Ok(())
 }
@@ -34,12 +34,12 @@ async fn goodbye(
     #[channel_types("Text")]
     channel: serenity::GuildChannel,
 ) -> Result<()> {
-    ctx.say(format!("{}", channel.id)).await?;
+    let mut guard = CONFIG.write().await;
 
-    {
-        let mut guard = CONFIG.write().await;
-        guard.goodbye_channel = channel.id.into();
-    }
+    ctx.say(format!("{}", channel.id)).await?;
+    guard
+        .update_config(|c| c.goodbye_channel = channel.id)
+        .await?;
 
     Ok(())
 }
@@ -51,12 +51,12 @@ async fn counting(
     #[channel_types("Text")]
     channel: serenity::GuildChannel,
 ) -> Result<()> {
-    ctx.say(format!("{}", channel.id)).await?;
+    let mut guard = CONFIG.write().await;
 
-    {
-        let mut guard = CONFIG.write().await;
-        guard.counting_channel = channel.id.into();
-    }
+    ctx.say(format!("{}", channel.id)).await?;
+    guard
+        .update_config(|c| c.counting_channel = channel.id)
+        .await?;
 
     Ok(())
 }
@@ -65,7 +65,7 @@ async fn counting(
 async fn debug(ctx: Context<'_>) -> Result<()> {
     let text = {
         let cfg = CONFIG.read().await;
-        format!("```rust\n{:#?}\n```", *cfg)
+        format!("```rust\n{:#?}\n```", cfg.inner)
     };
     ctx.say(text).await?;
     Ok(())

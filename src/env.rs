@@ -14,6 +14,6 @@ fn read_env() -> Result<HashMap<String, String>> {
     Ok(result)
 }
 
-pub fn var<'a>(name: &'a str) -> String {
+pub fn var(name: &str) -> String {
     read_env().unwrap()[name].to_owned()
 }
