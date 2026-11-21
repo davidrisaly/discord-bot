@@ -4,7 +4,7 @@ use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE, HeaderMap, HeaderValu
 use structs::*;
 
 impl UnbelievaBoat {
-    pub fn new(token: &str) -> anyhow::Result<Self> {
+    pub fn new(token: String) -> anyhow::Result<Self> {
         let mut headers = HeaderMap::new();
         headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
@@ -18,8 +18,7 @@ impl UnbelievaBoat {
     }
 
     pub async fn get_guild_leaderboard(&self, guild_id: u64) -> reqwest::Result<GuildLeaderboard> {
-        self
-            .client
+        self.client
             .get(format!(
                 "https://unbelievaboat.com/api/v1/guilds/{}",
                 guild_id
@@ -35,8 +34,7 @@ impl UnbelievaBoat {
         guild_id: u64,
         user_id: u64,
     ) -> reqwest::Result<UserBalance> {
-        self
-            .client
+        self.client
             .get(format!(
                 "https://unbelievaboat.com/api/v1/guilds/{}/users/{}",
                 guild_id, user_id

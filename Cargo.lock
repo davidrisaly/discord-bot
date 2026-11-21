@@ -422,6 +422,8 @@ dependencies = [
  "anyhow",
  "poise",
  "rand 0.10.4",
+ "serde",
+ "serde_json",
  "serenity",
  "thousands",
  "tokio",
