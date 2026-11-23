@@ -1,23 +1,20 @@
-use super::*;
+use super::{counting::counting, serenity::FullEvent, *};
 
-pub async fn event_handler(
-    ctx: poise::FrameworkContext<'_, U, E>,
-    event: &serenity::FullEvent,
-) -> Result<()> {
+pub async fn event_handler(ctx: FrameworkContext<'_>, event: &FullEvent) -> anyhow::Result<()> {
     match event {
-        Ready { data_about_bot } => {
+        FullEvent::Ready { data_about_bot } => {
             if let Some(discriminator) = data_about_bot.user.discriminator {
                 println!("{}#{} is online", data_about_bot.user.name, discriminator);
             } else {
                 println!("{} is online", data_about_bot.user.name)
             }
         }
-        Message { new_message }
+        FullEvent::Message { new_message }
             if new_message.channel_id == CONFIG.read().await.inner.channels.counting =>
         {
-            counting(new_message);
+            counting(new_message).await;
         }
-        GuildMemberAddition { new_member } => {
+        FullEvent::GuildMemberAddition { new_member } => {
             ChannelId::new(1570146478272553061)
                 .say(
                     &ctx.serenity_context.http,
@@ -28,7 +25,7 @@ pub async fn event_handler(
                 .add_role(&ctx.serenity_context.http, 1566272833246732328)
                 .await?;
         }
-        GuildMemberRemoval { user, .. } => {
+        FullEvent::GuildMemberRemoval { user, .. } => {
             ChannelId::new(1570146550921953461)
                 .say(
                     &ctx.serenity_context.http,

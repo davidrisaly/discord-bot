@@ -1,6 +1,6 @@
 //! for checking if counting goes right
 
-use serenity::model::channel::Message;
+use super::{CONFIG, Message};
 
 /// How it works
 /// compare 2 values (current_number and next_number).
@@ -17,4 +17,8 @@ use serenity::model::channel::Message;
 /// }
 /// ```
 // TODO: Implement this later, i'm too sleepy rn.
-pub fn counting(message: &Message) {}
+pub async fn counting(message: &Message) {
+    let mut guard = CONFIG.write().await;
+
+    let current_number = guard.inner.counting.current_number;
+}

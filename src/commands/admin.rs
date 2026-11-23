@@ -1,3 +1,5 @@
+use crate::config::Config;
+
 use super::*;
 
 #[poise::command(
@@ -19,7 +21,11 @@ async fn welcome(
 ) -> Result<()> {
     let mut guard = CONFIG.write().await;
 
-    ctx.say(format!("{}", channel.id)).await?;
+    ctx.say(format!(
+        "Welcome channel set to <#{}> successfully",
+        channel.id
+    ))
+    .await?;
     guard
         .update_config(|c| c.channels.welcome = channel.id)
         .await?;
@@ -36,7 +42,11 @@ async fn goodbye(
 ) -> Result<()> {
     let mut guard = CONFIG.write().await;
 
-    ctx.say(format!("{}", channel.id)).await?;
+    ctx.say(format!(
+        "Goodbye channel set to <#{}> successfully",
+        channel.id
+    ))
+    .await?;
     guard
         .update_config(|c| c.channels.goodbye = channel.id)
         .await?;
@@ -53,7 +63,11 @@ async fn counting(
 ) -> Result<()> {
     let mut guard = CONFIG.write().await;
 
-    ctx.say(format!("{}", channel.id)).await?;
+    ctx.say(format!(
+        "Counting channel set to <#{}> successfully",
+        channel.id
+    ))
+    .await?;
     guard
         .update_config(|c| c.channels.counting = channel.id)
         .await?;
@@ -64,8 +78,8 @@ async fn counting(
 #[poise::command(slash_command)]
 async fn debug(ctx: Context<'_>) -> Result<()> {
     let text = {
-        let cfg = CONFIG.read().await;
-        format!("```rust\n{:#?}\n```", cfg.inner)
+        let cfg = serde_json::to_string_pretty::<Config>(&CONFIG.read().await.inner)?;
+        format!("```json\n{}\n```", cfg)
     };
     ctx.say(text).await?;
     Ok(())

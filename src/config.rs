@@ -10,10 +10,19 @@ pub struct Channel {
     pub counting: ChannelId,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Counting {
-    pub previous_number: u64,
     pub current_number: u64,
+    pub next_number: u64,
+}
+
+impl Default for Counting {
+    fn default() -> Self {
+        Self {
+            current_number: 1,
+            next_number: 2,
+        }
+    }
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]

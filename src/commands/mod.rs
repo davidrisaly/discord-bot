@@ -1,19 +1,18 @@
 pub mod admin;
+pub mod counting;
 pub mod event_handler;
 pub mod moderator;
 
-use crate::{config::Store, counting::counting, env::var, serenity};
+use crate::{config::Store, env::var, serenity};
 use anyhow::{Error as E, Result};
-use serenity::{
-    FullEvent::{GuildMemberAddition, GuildMemberRemoval, Message, Ready},
-    model::id::ChannelId,
-};
+use serenity::model::{channel::Message, id::ChannelId};
 use std::sync::LazyLock;
 use tokio::sync::RwLock;
 use unb_api::structs::UnbelievaBoat;
 
 pub struct U {}
 pub type Context<'a> = poise::Context<'a, U, E>;
+pub type FrameworkContext<'a> = poise::FrameworkContext<'a, U, E>;
 
 /// Provides function expansion to UnbelievaBoat with the help of UnbelievaBoat API.
 // TODO: Make this bot's own economy later.

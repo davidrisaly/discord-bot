@@ -1,6 +1,5 @@
 mod commands;
 mod config;
-mod counting;
 mod env;
 mod leveling;
 mod tests;
