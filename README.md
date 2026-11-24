@@ -8,7 +8,7 @@ Support for multi guild and many user handling will be there soon (if school don
 
 ## Features
 - welcome/goodbye message (implemented)
-- counting (in progress)
+- counting (implemented)
 - moderation
 - leveling
 - economy
