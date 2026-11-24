@@ -1,6 +1,7 @@
 pub mod admin;
 pub mod counting;
 pub mod event_handler;
+pub mod leveling;
 pub mod moderator;
 
 use crate::{config::Store, env::var, serenity};

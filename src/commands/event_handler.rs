@@ -12,7 +12,7 @@ pub async fn event_handler(ctx: FrameworkContext<'_>, event: &FullEvent) -> anyh
         FullEvent::Message { new_message }
             if new_message.channel_id == CONFIG.read().await.inner.channels.counting =>
         {
-            counting(new_message).await;
+            counting(ctx, new_message).await?;
         }
         FullEvent::GuildMemberAddition { new_member } => {
             ChannelId::new(1570146478272553061)

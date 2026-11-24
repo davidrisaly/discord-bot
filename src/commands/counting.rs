@@ -1,24 +1,43 @@
 //! for checking if counting goes right
 
-use super::{CONFIG, Message};
+use super::{CONFIG, FrameworkContext, Message, Result};
+use crate::config::Counting;
+use serenity::{model::id::UserId, prelude::CacheHttp};
 
-/// How it works
-/// compare 2 values (current_number and next_number).
-///
-/// rust pseudocode:
-/// ```rust
-/// if next_number == current_number + 1 {
-///     say("Approved! :thumbs_up:");
-///     next_number += 1;
-/// }
-/// else if next_number != current_number + 1 { current_number = 0; }
-/// else {
-///     return;
-/// }
-/// ```
-// TODO: Implement this later, i'm too sleepy rn.
-pub async fn counting(message: &Message) {
+pub async fn counting(ctx: FrameworkContext<'_>, message: &Message) -> Result<()> {
     let mut guard = CONFIG.write().await;
+    let cfg = &guard.inner;
 
-    let current_number = guard.inner.counting.current_number;
+    let current_number = cfg.counting.current_number;
+    let current_author = cfg.counting.current_author;
+
+    if message.content.parse::<u64>()? == current_number && message.author.id != current_author {
+        guard
+            .update_config(|c| c.counting.current_number += 1)
+            .await?;
+        guard
+            .update_config(|c| c.counting.current_author = message.author.id)
+            .await?;
+        message.react(&ctx.serenity_context.http(), '✅').await?;
+    } else {
+        cfg.channels
+            .counting
+            .say(
+                &ctx.serenity_context.http(),
+                format!(
+                    "Wrong number! <@{}>. The next number is {}",
+                    message.author.id,
+                    current_number + 1
+                ),
+            )
+            .await?;
+        guard
+            .update_config(|c| c.counting.current_number = Counting::default().current_number)
+            .await?;
+        guard
+            .update_config(|c| c.counting.current_author = UserId::default())
+            .await?;
+    }
+
+    Ok(())
 }

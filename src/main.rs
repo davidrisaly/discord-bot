@@ -1,7 +1,6 @@
 mod commands;
 mod config;
 mod env;
-mod leveling;
 mod tests;
 
 use poise::serenity_prelude as serenity;
@@ -11,7 +10,7 @@ async fn main() -> anyhow::Result<()> {
     let token = env::var("DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged()
         | serenity::GatewayIntents::GUILD_MEMBERS
-        | serenity::GatewayIntents::GUILD_MESSAGES;
+        | serenity::GatewayIntents::MESSAGE_CONTENT;
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: commands::cmds(),

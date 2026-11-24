@@ -1,7 +1,7 @@
 use std::{fs::File, io::Write};
 
 use serde::{Deserialize, Serialize};
-use serenity::model::id::ChannelId;
+use serenity::model::id::{ChannelId, UserId};
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Channel {
@@ -13,14 +13,14 @@ pub struct Channel {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Counting {
     pub current_number: u64,
-    pub next_number: u64,
+    pub current_author: UserId,
 }
 
 impl Default for Counting {
     fn default() -> Self {
         Self {
             current_number: 1,
-            next_number: 2,
+            current_author: UserId::default(),
         }
     }
 }

@@ -4,7 +4,7 @@ members = ["unb_api"]
 
 [package]
 name = "discord-bot"
-version = "0.4.4"
+version = "0.5.4"
 edition = "2024"
 
 [profile.release]
