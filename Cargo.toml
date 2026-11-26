@@ -29,6 +29,7 @@ tokio = { version = "1.54.1", features = ["rt-multi-thread"] }
 serenity = "0.12.5"
 poise = "0.7.1"
 tempfile = "3.27.0"
+dotenvy = "0.15.7"
 
 # thousands = "0.2.0"
 # rand = "0.10.4"

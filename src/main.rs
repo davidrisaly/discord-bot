@@ -1,13 +1,14 @@
 mod commands;
 mod config;
-mod env;
 mod tests;
 
 use poise::serenity_prelude as serenity;
+use std::env;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let token = env::var("DISCORD_TOKEN");
+    dotenvy::dotenv()?;
+    let token = env::var("DISCORD_TOKEN")?;
     let intents = serenity::GatewayIntents::non_privileged()
         | serenity::GatewayIntents::GUILD_MEMBERS
         | serenity::GatewayIntents::MESSAGE_CONTENT;
